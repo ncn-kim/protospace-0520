@@ -1,5 +1,6 @@
 class PrototypesController < ApplicationController
   before_action :authenticate_user!, except: [:index, :show ]
+  before_action :only_contributor, only: [:edit, :update, :destroy]
   def index
     @prototypes = Prototype.includes(:user)
   end
@@ -29,8 +30,11 @@ class PrototypesController < ApplicationController
 
   def update
     prototype = Prototype.find(params[:id])
-    prototype.update(prototype_params)
-    redirect_to root_path
+    if prototype.update(prototype_params)
+      redirect_to prototype_path(prototype)
+    else
+      render :edit, status: :unprocessable_entity
+    end
   end
 
   def destroy
@@ -43,6 +47,13 @@ class PrototypesController < ApplicationController
 
   def prototype_params
     params.require(:prototype).permit(:title, :image, :concept, :catch_copy).merge(user_id: current_user.id)
+  end
+
+  def only_contributor
+    @prototype = Prototype.find(params[:id])
+    unless @prototype.user == current_user
+      redirect_to root_path
+    end
   end
 
 end
