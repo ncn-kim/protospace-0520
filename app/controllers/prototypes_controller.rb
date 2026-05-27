@@ -1,21 +1,10 @@
+# frozen_string_literal: true
+
 class PrototypesController < ApplicationController
-  before_action :authenticate_user!, except: [:index, :show ]
-  before_action :only_contributor, only: [:edit, :update, :destroy]
+  before_action :authenticate_user!, except: %i[index show]
+  before_action :only_contributor, only: %i[edit update destroy]
   def index
     @prototypes = Prototype.includes(:user)
-  end
-
-  def new
-    @prototype = Prototype.new
-  end
-
-  def create
-    @prototype = Prototype.create(prototype_params)
-    if @prototype.save
-      redirect_to root_path
-    else
-      render :new, status: :unprocessable_entity
-    end
   end
 
   def show
@@ -24,8 +13,21 @@ class PrototypesController < ApplicationController
     @comments = @prototype.comments.includes(:user)
   end
 
+  def new
+    @prototype = Prototype.new
+  end
+
   def edit
     @prototype = Prototype.find(params[:id])
+  end
+
+  def create
+    @prototype = Prototype.create(prototype_params)
+    if @prototype.save
+      redirect_to root_path
+    else
+      render :new, status: :unprocessable_content
+    end
   end
 
   def update
@@ -33,7 +35,7 @@ class PrototypesController < ApplicationController
     if prototype.update(prototype_params)
       redirect_to prototype_path(prototype)
     else
-      render :edit, status: :unprocessable_entity
+      render :edit, status: :unprocessable_content
     end
   end
 
@@ -51,9 +53,8 @@ class PrototypesController < ApplicationController
 
   def only_contributor
     @prototype = Prototype.find(params[:id])
-    unless @prototype.user == current_user
-      redirect_to root_path
-    end
-  end
+    return if @prototype.user == current_user
 
+    redirect_to root_path
+  end
 end

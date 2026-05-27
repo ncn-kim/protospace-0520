@@ -1,0 +1,16 @@
+require:
+  - rubocop-rails
+
+AllCops:
+  NewCops: enable
+  Exclude:
+    - "db/**/*"
+    - "bin/**/*"
+    - "config/**/*"
+    - "vendor/**/*"
+
+Style/Documentation:
+  Enabled: false
+
+Metrics/BlockLength:
+  Max: 200
